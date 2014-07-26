@@ -8,7 +8,7 @@ require 'json'
 
 module Pump
   class Login
-    attr_reader :client, :username, :password, :site, :host, :token, :secret, :oauth
+    attr_reader :client, :username, :password, :site, :host, :token, :secret, :oauth, :nickname, :url, :followers_url
 
     def initialize(client, site, username, password, secrets_json=nil)
       @client = client
@@ -19,10 +19,16 @@ module Pump
 
       if secrets_json.nil?
         fetch_secrets
+        fetch_user_details
+
+        write_secrets(JSON.generate({
+          username: @username, site: @site,
+          token: @token, secret: @secret,
+          nickname: @nickname, url: @url, followers_url: @followers_url
+        }))
       else
         set_from_json(secrets_json)
       end
-      # run_self_check
     end
 
     private
@@ -115,12 +121,7 @@ module Pump
       @token = access_token.token
       @secret = access_token.secret
       puts "    · Obtained Oauth tokens, success!"
-
-
-      write_secrets(JSON.generate({
-          username: @username, site: @site,
-          token: @token, secret: @secret
-        }))
+      return true
     end
 
     def write_secrets(s)
@@ -141,7 +142,7 @@ module Pump
       end
     end
 
-    def run_self_check
+    def fetch_user_details
       uri = URI.parse("https://#{@host}/api/whoami")
       auth_hash = {
         consumer: @oauth,
@@ -150,10 +151,26 @@ module Pump
       }
       whoami = Communicator.get(uri.to_s, 443, nil, auth_hash)
       puts "  · initialisation and self-check for #{@username}@#{@host} complete." if redirected_to_own_profile?(whoami)
+
+      uri = URI.parse(whoami.header['Location'])
+      auth_hash = {
+        consumer: @oauth,
+        site: @site, request_uri: uri.to_s,
+        key: @secret, token: OAuth::Token.new(@token, @secret)
+      }
+      profile = Communicator.get(uri.to_s, 443, nil, auth_hash)
+      parse_user_details(profile.body)
     end
 
     def redirected_to_own_profile?(http_resp)
       http_resp.header['Location'] == "#{@site}/api/user/#{@username}/profile"
+    end
+
+    def parse_user_details(j)
+      profile = JSON.parse(j)
+      @nickname = profile["displayName"]
+      @url = profile["url"]
+      @followers_url = profile["followers"]["url"]
     end
   end
 end
