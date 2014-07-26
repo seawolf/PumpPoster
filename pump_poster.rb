@@ -1,5 +1,6 @@
 require './lib/pump/client.rb'
 require './lib/pump/login.rb'
+require './lib/net/rss/lastfm.rb'
 
 require 'optparse'
 require 'json'
@@ -64,3 +65,4 @@ end
 
 puts "  · Loaded PumpPoster v#{Pump::Poster::VERSION}"
 app = Pump::Poster.new(parse_opts)
+  RSS::LastFm.new("iamseawolf", app.login)
