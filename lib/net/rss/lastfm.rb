@@ -16,10 +16,11 @@ module RSS
       @username = username
       @pump_login = pump_login
       @results = []
-      go unless last_fetch_timestamp > Time.now - FEED_CACHE
+      epoch = last_fetch_timestamp
+      go(epoch) unless epoch > Time.now - FEED_CACHE
     end
 
-    def go
+    def go(epoch)
       rss = SimpleRSS.parse ::Communicator.get("http://ws.audioscrobbler.com/1.0/user/#{@username}/recenttracks.rss?limit=#{FEED_LIMIT}", 80).body
       update_last_fetch_timestamp
       rss.items.each do |item|
@@ -49,8 +50,9 @@ module RSS
           result[:artist][:name], result[:artist][:link],
         )
 
-        @results << result
-        # Pump::Activities::Listen.new(... , content)
+        if result[:datetime].strftime("%s").to_i > epoch.to_i
+          @results << result
+        end
       end
     end
 
@@ -65,14 +67,14 @@ module RSS
     def update_last_fetch_timestamp
       t = Time.now
       File.open('LASTFM_FETCHED.TXT', 'w') {|f| f.write( t.strftime("%s")) }
-      puts "    · Last.FM feed last fetched: #{t}"
+      puts "  · Last.FM feed updated: #{t}"
     end
 
     def last_fetch_timestamp
       begin
         content = File.read('LASTFM_FETCHED.TXT')
         timestamp = Time.at(content.to_i)
-        puts "    · Last.FM feed last fetched: #{timestamp}"
+        puts "  · Last.FM feed last fetched: #{timestamp}"
         return timestamp
       rescue Errno::ENOENT
         return Time.at(0)
