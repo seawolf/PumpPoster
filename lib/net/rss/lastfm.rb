@@ -38,10 +38,13 @@ module RSS
         #   :guid         => "http://www.last.fm/user/iamseawolf#1406154854"
         # }
 
-        result[:song][:link] = item[:link]
-        result[:song][:name] = URI.decode_www_form_component( item[:title] )
         result[:artist][:link] = item[:description]
         result[:artist][:name] = URI.decode_www_form_component( result[:artist][:link].sub(/^http\:\/\/www.last.fm\/music\//, '') )
+        result[:song][:link] = item[:link]
+
+        result[:song][:name] = URI.decode_www_form_component(item[:title])
+        artist_in_song_name = result[:artist][:name].length
+        result[:song][:name] = result[:song][:name][(artist_in_song_name + 3)..-1]
 
         result[:datetime] = item[:pubDate]
 
