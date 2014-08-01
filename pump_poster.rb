@@ -9,7 +9,7 @@ require 'json'
 
 module Pump
   class Poster
-    attr_reader :login
+    attr_reader :login, :activity
 
     NAME        = "PumpPoster"
     VERSION     = "0.1"
@@ -20,6 +20,7 @@ module Pump
       site = options_hash[:site]
       user = options_hash[:user]
       pass = options_hash[:pass]
+      @activity = options_hash[:activity]
 
       begin
         client_tokens = JSON.parse(File.read('CLIENT_SECRETS.TXT'))
@@ -54,6 +55,10 @@ def parse_opts
 
     opts.on('-p', '--pass PASSWORD', 'Password for your account') do |p|
       options[:pass] = p
+    end
+
+    opts.on('-a', '--activity NAME', 'Run an activity') do |a|
+      options[:activity] = a
     end
 
     opts.on('-h', '--help', 'Display this screen' ) do

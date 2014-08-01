@@ -4,12 +4,18 @@ module Pump
 
     def initialize(app)
       @app = app
-      while true
-        show_menu
-        last_cmd = ask_for_input
-        break if last_cmd == :quit
+      if @app.activity.nil?
+        while true
+          show_menu
+          last_cmd = ask_for_input
+          break if last_cmd == :quit
+        end
+      else
+        run_activity(@app.activity)
       end
     end
+
+    private
 
     def show_menu
       puts <<EOM
@@ -31,13 +37,24 @@ EOM
           puts "Bye!"
           return :quit
         when command.match(/^c/) then
-          puts "  · SportsTracker support coming soon!\n"
+          run_activity("cycle")
         when command.match(/^d/) then
-          puts "  · Untappd/PerfectPint support coming soon!\n"
+          run_activity("drink")
         when command.match(/^l/) then
+          run_activity("listen")
+      end
+    end
+
+    def run_activity(cmd)
+      case cmd
+        when "cycle"
+          puts "  · SportsTracker support coming soon!\n"
+        when "drink"
+          puts "  · Untappd/PerfectPint support coming soon!\n"
+        when "listen"
           puts "  · LastFM selected.\n"
-          Pump::Activities::Listen.new(app.login,
-            RSS::LastFm.new("iamseawolf", app.login)
+          Pump::Activities::Listen.new(@app.login,
+            RSS::LastFm.new("iamseawolf", @app.login)
           ).submit!
       end
     end
