@@ -20,6 +20,11 @@ module Pump
       site = options_hash[:site]
       user = options_hash[:user]
       pass = options_hash[:pass]
+      unless site && user && pass
+        puts "  * You must supply a site, username and password. Try: #{__FILE__} --help"
+        exit 65
+      end
+
       @activity = options_hash[:activity]
 
       begin
@@ -42,7 +47,7 @@ end
 def parse_opts
   options = {}
   OptionParser.new do |opts|
-    opts.banner = "Usage: #{__FILE__} [options]"
+    opts.banner = "  · Usage: #{__FILE__} [options]"
 
     opts.on('-s', '--site URL', 'Full URL of the Pump.io site, e.g. https://identi.ca') do |s|
       s.chomp!("/") if s[-1] == "/"

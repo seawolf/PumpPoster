@@ -9,7 +9,7 @@ module RSS
   class LastFm
     attr_reader :username, :pump_login, :results, :limit
 
-    FEED_LIMIT = 200
+    FEED_LIMIT = 10
     FEED_CACHE = 5 * 60 # minutes
 
     def initialize(username, pump_login=nil)
