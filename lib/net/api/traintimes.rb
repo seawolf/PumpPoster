@@ -16,9 +16,9 @@ module Api
         @date = date
 
         response = ::Communicator.get("#{HOST}/schedule_full.json?uid=#{@uid}&date=#{@date.strftime("%Y-%m-%d")}", 80)
-        @results = JSON.parse(response.body)
+        @results = response.code == 200 ? JSON.parse(response.body) : []
 
-        cleanup!
+        cleanup! unless @results.empty?
       end
 
       private
@@ -35,7 +35,7 @@ module Api
       end
 
       def clean_time(str)
-        str.insert(2, ":") if str.is_a?(String)
+        str.insert(2, ":") if str.is_a?(String) && str.length >= 4
       end
     end
   end

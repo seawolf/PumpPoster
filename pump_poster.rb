@@ -14,32 +14,42 @@ module Pump
     MAINTAINER  = "webmaster@seawolfsanctuary.com"
     WEBSITE     = "https://seawolfsanctuary.com/"
 
-    def initialize(options_hash)
-      site = options_hash[:site]
-      user = options_hash[:user]
-      pass = options_hash[:pass]
-      unless site && user && pass
-        puts "  * You must supply a site, username and password. Try: #{__FILE__} --help"
-        exit 65
-      end
+    CLIENT_SECRETS  = "CLIENT_SECRETS.TXT"
+    LOGIN_SECRETS   = "LOGIN_SECRETS.TXT"
 
+    def initialize(options_hash)
       @activity = options_hash[:activity]
 
-      begin
-        client_tokens = JSON.parse(File.read('CLIENT_SECRETS.TXT'))
+      if secrets_exist?
+        client_tokens = JSON.parse(File.read(CLIENT_SECRETS))
         puts "    · Client tokens loaded."
-      rescue Errno::ENOENT
-      end
-      client = Pump::Client.new(site, client_tokens)
 
-      begin
-        oauth_tokens = JSON.parse(File.read('LOGIN_SECRETS.TXT'))
+        oauth_tokens = JSON.parse(File.read(LOGIN_SECRETS))
         puts "    · Login tokens loaded."
-      rescue Errno::ENOENT
+
+        site = oauth_tokens["site"]
+        user = oauth_tokens["username"]
+      else
+        site = options_hash[:site]
+        user = options_hash[:user]
+        pass = options_hash[:pass]
+
+        unless (site && user && pass)
+          puts "  * You must supply a site, username and password. Try: #{__FILE__} --help"
+          exit 65
+        end
       end
+
+      client = Pump::Client.new(site, client_tokens)
       @login = Pump::Login.new(client, site, user, pass, oauth_tokens)
 
       Pump::Menu.new(self)
+    end
+
+    private
+
+    def secrets_exist?
+      return File.exist?(CLIENT_SECRETS) && File.exist?(LOGIN_SECRETS)
     end
   end
 end

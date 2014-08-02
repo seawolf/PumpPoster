@@ -12,10 +12,11 @@ module Pump
       def initialize(login, data=nil)
         @login = login
         data = ask_for_data unless data.is_a?(Hash)
-        @journey = Journey.new(data, @login)
+        @journey = Journey.new(data, @login) unless data.nil? || data.keys.empty?
       end
 
       def submit!
+        return nil if @journey.nil?
         puts "Press Enter to post." ; gets
         puts "  · Posting journey..."
         posted = post!( decorate )
@@ -24,9 +25,19 @@ module Pump
       end
 
       def ask_for_data
-        print "  > UID: "; uid = gets.chomp.upcase
-        print "  > Date (YYYY-MM-DD): "; date = Date.parse(gets.chomp)
+        uid = ""
+        while uid.length == 0
+          print "  > UID: "; uid = gets.chomp.upcase
+        end
+
+        begin
+          print "  > Date (YYYY-MM-DD): "; date = Date.parse(gets.chomp)
+        rescue ArgumentError
+          retry
+        end
+
         others = ::Api::TrainTimes::Schedule.new(uid, date).results
+        return nil if others.empty?
 
         headcode = others["trainIdentity"]
 

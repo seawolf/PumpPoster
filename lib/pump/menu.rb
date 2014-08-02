@@ -49,6 +49,8 @@ EOM
           run_activity("listen")
         when command.match(/^t/) then
           run_activity("train")
+        else
+          puts "  ! Unknown command: #{command}"
       end
     end
 
@@ -66,6 +68,8 @@ EOM
         when "train"
           puts "  · RealTimeTrains selected.\n"
           Pump::Activities::TrainJourney.new(@app.login).submit!
+        else
+          puts "  ! Unknown command: #{cmd}"
       end
     end
   end
