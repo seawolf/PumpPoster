@@ -1,3 +1,7 @@
+require './lib/net/rss/lastfm.rb'
+require './lib/pump/activities/listen.rb'
+require './lib/pump/activities/train_journey.rb'
+
 module Pump
   class Menu
     attr_reader :app
@@ -24,6 +28,7 @@ module Pump
       [c]ycled a route
       [d]rank a beer
       [l]istened to a music track
+      [t]ravelled by train
     or you can
       [q]uit
 EOM
@@ -42,6 +47,8 @@ EOM
           run_activity("drink")
         when command.match(/^l/) then
           run_activity("listen")
+        when command.match(/^t/) then
+          run_activity("train")
       end
     end
 
@@ -56,6 +63,9 @@ EOM
           Pump::Activities::Listen.new(@app.login,
             RSS::LastFm.new("iamseawolf", @app.login)
           ).submit!
+        when "train"
+          puts "  · RealTimeTrains selected.\n"
+          Pump::Activities::TrainJourney.new(@app.login).submit!
       end
     end
   end

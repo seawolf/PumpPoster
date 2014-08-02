@@ -1,7 +1,5 @@
 require './lib/pump/client.rb'
 require './lib/pump/login.rb'
-require './lib/net/rss/lastfm.rb'
-require './lib/pump/activities/listen.rb'
 require './lib/pump/menu.rb'
 
 require 'optparse'
@@ -40,6 +38,8 @@ module Pump
       rescue Errno::ENOENT
       end
       @login = Pump::Login.new(client, site, user, pass, oauth_tokens)
+
+      Pump::Menu.new(self)
     end
   end
 end
@@ -77,5 +77,3 @@ end
 
 puts "  · Loaded PumpPoster v#{Pump::Poster::VERSION}"
 app = Pump::Poster.new(parse_opts)
-
-Pump::Menu.new(app)
