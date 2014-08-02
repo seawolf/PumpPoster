@@ -33,9 +33,13 @@ module Pump
           key: @login.secret, token: OAuth::Token.new(@login.token, @login.secret)
         }
         response = Communicator.post(uri.to_s, 443, decorated_data, nil, auth_hash)
-        puts response.body
-        puts "  · Successful!" if response.code == 200
-
+        if response.code.to_i == 200
+          puts "  · Successful!"
+          puts "    -> #{JSON.parse(response.body)["id"]}"
+        else
+          puts "  ! Unsuccessful: #{response.code}"
+          puts response.body
+        end
         return response
       end
 
@@ -51,9 +55,12 @@ module Pump
           key: @login.secret, token: OAuth::Token.new(@login.token, @login.secret)
         }
         response = Communicator.get(uri.to_s, 443, nil, auth_hash)
-        puts response.code
-        puts response.body
-
+        if response.code.to_i == 200
+          puts "  · Successful!"
+        else
+          puts "  ! Unsuccessful: #{response.code}"
+          puts response.body
+        end
         return response
       end
 
@@ -71,10 +78,12 @@ module Pump
           key: @login.secret, token: OAuth::Token.new(@login.token, @login.secret)
         }
         response = Communicator.delete(uri.to_s, 443, nil, auth_hash)
-        puts "  · Successful!" if [200, 202, 204].include?(response.code)
-        puts response.code
-        puts response.body
-
+        if [200, 202, 204].include?(response.code.to_i)
+          puts "  · Successful! (#{response.code})"
+        else
+          puts "  ! Unsuccessful: #{response.code}"
+          puts response.body
+        end
         return response
       end
 
@@ -144,7 +153,7 @@ module Pump
           }
         }
 
-        data["published"] = track[:datetime].strftime("%Y-%m-%dT%H:%M:%S") unless track[:datetime].nil?
+        data["published"] = track[:datetime].strftime("%Y-%m-%dT%H:%M:%S.%LZ") unless track[:datetime].nil?
 
         return data
       end
