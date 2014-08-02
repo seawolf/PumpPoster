@@ -1,3 +1,4 @@
+require './lib/net/api/traintimes.rb'
 require './lib/net/communicator.rb'
 
 require 'date'
@@ -15,61 +16,75 @@ module Pump
       end
 
       def submit!
-        pp decorate
         puts "Press Enter to post." ; gets
         puts "  · Posting journey..."
-        # posted = post!( decorate )
+        posted = post!( decorate )
         # check(posted)
         # delete!(posted)
       end
 
       def ask_for_data
-        print "UID: "; uid = gets.chomp
-        print "Headcode: "; headcode = gets.chomp
+        print "  > UID: "; uid = gets.chomp.upcase
+        print "  > Date (YYYY-MM-DD): "; date = Date.parse(gets.chomp)
+        others = ::Api::TrainTimes::Schedule.new(uid, date).results
 
-        print "Schedule Origin code: "; schedule_origin_cors = gets.chomp
-        print "Schedule Origin name: "; schedule_origin_name = gets.chomp
-        print "Schedule Departure date (YYYY-MM-DD): "; schedule_origin_date = gets.chomp
-        print "Schedule Departure time (HH:MM): "; schedule_origin_time = gets.chomp
-        print "Schedule Terminus code: "; schedule_terminus_cors = gets.chomp
-        print "Schedule Terminus name: "; schedule_terminus_name = gets.chomp
-        print "Schedule Arrival date (YYYY-MM-DD): "; schedule_terminus_date = gets.chomp
-        print "Schedule Arrival time (HH:MM): "; schedule_terminus_time = gets.chomp
+        headcode = others["trainIdentity"]
 
-        print "Journey Origin code: "; origin_cors = gets.chomp
-        print "Journey Origin name: "; origin_name = gets.chomp
-        print "Journey Departure date (YYYY-MM-DD): "; origin_date = gets.chomp
-        print "Journey Departure time (HH:MM): "; origin_time = gets.chomp
-        print "Journey Terminus code: "; terminus_cors = gets.chomp
-        print "Journey Terminus name: "; terminus_name = gets.chomp
-        print "Journey Arrival date (YYYY-MM-DD): "; terminus_date = gets.chomp
-        print "Journey Arrival time (HH:MM): "; terminus_time = gets.chomp
+        calling_points = others["locations"]
 
-        return {
+        schedule_origin_cors = calling_points.first["crs"]
+        schedule_origin_name = calling_points.first["description"]
+        schedule_origin_date = calling_points.first["calldate"]
+        schedule_origin_time = calling_points.first["departure_time"]
+
+        schedule_terminus_cors = calling_points.last["crs"]
+        schedule_terminus_name = calling_points.last["description"]
+        schedule_terminus_date = calling_points.last["calldate"]
+        schedule_terminus_time = calling_points.last["arrival_time"]
+
+        puts "    · Found schedule for #{headcode} #{schedule_origin_name} (#{schedule_origin_cors}) to #{schedule_terminus_name} (#{schedule_terminus_cors})"
+
+        print "  > Origin code: "
+        origin_cors = gets.chomp.upcase
+        origin = calling_points.select { |c| c["crs"] == origin_cors }.first
+        origin_name = origin["description"]
+        origin_date = origin["calldate"]
+        origin_time = origin["departure_time"]
+        puts "    · Calling at #{origin_name} on #{origin_date} at #{origin_time}"
+
+        print "  > Terminus code: "
+        terminus_cors = gets.chomp.upcase
+        terminus = calling_points.select { |c| c["crs"] == terminus_cors }.last
+        terminus_name = terminus["description"]
+        terminus_date = terminus["calldate"]
+        terminus_time = terminus["arrival_time"]
+        puts "    · Calling at #{terminus_name} on #{terminus_date} at #{terminus_time}"
+
+        r = {
           schedule: {
             uid: uid,
             headcode: headcode,
             origin: {
               name: schedule_origin_name,
               cors: schedule_origin_cors,
-              datetime: "#{schedule_origin_date}T#{schedule_origin_time}:00+01:00"
+              datetime: DateTime.parse("#{schedule_origin_date}T#{schedule_origin_time}:00+01:00")
             },
             terminus: {
               name: schedule_terminus_name,
               cors: schedule_terminus_cors,
-              datetime: "#{schedule_terminus_date}T#{schedule_terminus_time}:00+01:00"
+              datetime: DateTime.parse("#{schedule_terminus_date}T#{schedule_terminus_time}:00+01:00")
             }
           },
           journey: {
             origin: {
               name: origin_name,
               cors: origin_cors,
-              datetime: "#{origin_date}T#{origin_time}:00+01:00"
+              datetime: DateTime.parse("#{origin_date}T#{origin_time}:00+01:00")
             },
             terminus: {
               name: terminus_name,
               cors: terminus_cors,
-              datetime: "#{terminus_date}T#{terminus_time}:00+01:00"
+              datetime: DateTime.parse("#{terminus_date}T#{terminus_time}:00+01:00")
             }
           }
         }
@@ -232,7 +247,7 @@ module Pump
         def initialize(name, cors, datetime=nil)
           @name = name
           @cors = cors
-          @datetime = DateTime.parse(datetime) unless datetime.nil?
+          @datetime = datetime
         end
       end
     end
