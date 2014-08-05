@@ -1,4 +1,6 @@
 require './lib/net/rss/lastfm.rb'
+require './lib/net/scraper/untappd.rb'
+require './lib/pump/activities/drink.rb'
 require './lib/pump/activities/listen.rb'
 require './lib/pump/activities/train_journey.rb'
 
@@ -59,7 +61,10 @@ EOM
         when "cycle"
           puts "  · SportsTracker support coming soon!\n"
         when "drink"
-          puts "  · Untappd/PerfectPint support coming soon!\n"
+          puts "  · Untappd selected.\n"
+          Pump::Activities::Drink.new(@app.login,
+            Scraper::Untappd.new("seawolf", @app.login)
+          ).submit!
         when "listen"
           puts "  · LastFM selected.\n"
           Pump::Activities::Listen.new(@app.login,
