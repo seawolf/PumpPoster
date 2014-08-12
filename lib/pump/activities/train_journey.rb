@@ -78,24 +78,24 @@ module Pump
             origin: {
               name: schedule_origin_name,
               cors: schedule_origin_cors,
-              datetime: DateTime.parse("#{schedule_origin_date}T#{schedule_origin_time}:00+01:00")
+              datetime: Pump::Util::DateTime.to_utc("#{schedule_origin_date}T#{schedule_origin_time}")
             },
             terminus: {
               name: schedule_terminus_name,
               cors: schedule_terminus_cors,
-              datetime: DateTime.parse("#{schedule_terminus_date}T#{schedule_terminus_time}:00+01:00")
+              datetime: Pump::Util::DateTime.to_utc("#{schedule_terminus_date}T#{schedule_terminus_time}")
             }
           },
           journey: {
             origin: {
               name: origin_name,
               cors: origin_cors,
-              datetime: DateTime.parse("#{origin_date}T#{origin_time}:00+01:00")
+              datetime: Pump::Util::DateTime.to_utc("#{origin_date}T#{origin_time}")
             },
             terminus: {
               name: terminus_name,
               cors: terminus_cors,
-              datetime: DateTime.parse("#{terminus_date}T#{terminus_time}:00+01:00")
+              datetime: Pump::Util::DateTime.to_utc("#{terminus_date}T#{terminus_time}")
             }
           }
         }
@@ -199,7 +199,8 @@ module Pump
           ]
         }
 
-        data["published"] = @journey.terminus.datetime.strftime("%Y-%m-%dT%H:%M:%S.%LZ")
+        # data["published"] = @journey.terminus.datetime.strftime("%Y-%m-%dT%H:%M:%SZ")
+        data["published"] = Pump::Util::DateTime.json_datetime(@journey.terminus.datetime)
 
         json = JSON.generate(data)
         return json

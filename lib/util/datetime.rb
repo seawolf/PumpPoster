@@ -10,9 +10,7 @@ module Pump
       end
 
       def self.to_utc(obj)
-        puts "  > (#{obj.class}): #{obj.inspect}"
         obj = ::DateTime.parse(obj) if obj.is_a?(String)
-        puts "    > UTC output: #{self.local_tzinfo.local_to_utc(obj)}\n"
         return self.local_tzinfo.local_to_utc(obj)
       end
 
