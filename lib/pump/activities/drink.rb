@@ -96,20 +96,6 @@ module Pump
             "id" => "acct:#{@login.username}@#{@login.host}"
           },
           "verb" => "consume",
-
-          # for multiple drinks, their objects should be wrapped in a
-          # collection, with some metadata:
-          #
-          # "collection" => {
-          #   "totalItems" => drinks.count,
-          #   "items" => drinks.collect do |drink|
-          #     decorate_drink(drink)
-          #   end
-          # },
-
-          # for a single drink, the Object can be simply added in:
-          "object" => decorate_drink(drinks)["object"],
-
           "to" => [
             {
               "objectType" => "collection",
@@ -123,6 +109,21 @@ module Pump
             }
           ]
         }
+
+        # for multiple drinks, their objects should be wrapped in a
+        # collection, with some metadata:
+        #
+        # data["collection"] = {
+        #   "totalItems" => drinks.count,
+        #   "items" => drinks.collect do |drink|
+        #     decorate_drink(drink)
+        #   end
+        # },
+
+        # for a single drink, the Object can be simply added in:
+        drink = decorate_drink(drinks)
+        data["object"]    = drink["object"]
+        data["published"] = drink["published"] unless drink["published"].nil?
 
         # TODO: how to handle a message for multiple drinks?
         data["content"] = drinks[:message] if drinks.is_a?(Hash)
@@ -143,7 +144,7 @@ module Pump
           }
         }
 
-        data["published"] = drink[:datetime].strftime("%Y-%m-%dT%H:%M:%S.%LZ") unless drink[:datetime].nil?
+        data["published"] = Pump::Util::DateTime.json_datetime(drink[:datetime]) unless drink[:datetime].nil?
 
         return data
       end
