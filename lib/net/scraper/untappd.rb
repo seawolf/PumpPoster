@@ -10,7 +10,7 @@ module Scraper
 
     FEED_LIMIT = 10
     FEED_CACHE = 5 * 60 # minutes
-    BASE_URI = "http://untappd.com"
+    BASE_URI = "https://untappd.com"
 
     def initialize(username, pump_login=nil)
       @username = username
@@ -38,7 +38,7 @@ module Scraper
     end
 
     def download_page
-      page = Communicator.get(profile_url, 80)
+      page = Communicator.get(profile_url, 443)
       if page.code.to_i == 200
         update_last_fetch_timestamp
         return Hpricot(page.body)
