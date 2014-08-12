@@ -46,14 +46,15 @@ module RSS
         artist_in_song_name = result[:artist][:name].length
         result[:song][:name] = result[:song][:name][(artist_in_song_name + 3)..-1]
 
-        result[:datetime] = item[:pubDate]
+        pubDate = item[:pubDate]
+        result[:datetime] = Pump::Util::DateTime.to_utc(pubDate)
 
         result[:message] = generate_content(
           result[:song][:name],   result[:song][:link],
           result[:artist][:name], result[:artist][:link],
         )
 
-        if result[:datetime].strftime("%s").to_i > epoch.to_i
+        if pubDate.strftime("%s").to_i > epoch.to_i
           @results << result
         end
       end

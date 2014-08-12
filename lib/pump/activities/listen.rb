@@ -97,19 +97,6 @@ module Pump
           },
           "verb" => "listen",
 
-          # for multiple tracks, their objects should be wrapped in a
-          # collection, with some metadata:
-          #
-          # "collection" => {
-          #   "totalItems" => tracks.count,
-          #   "items" => tracks.collect do |track|
-          #     decorate_track(track)
-          #   end
-          # },
-
-          # for a single track, the Object can be simply added in:
-          "object" => decorate_track(tracks)["object"],
-
           "to" => [
             {
               "objectType" => "collection",
@@ -123,6 +110,21 @@ module Pump
             }
           ]
         }
+
+        # for multiple tracks, their objects should be wrapped in a
+        # collection, with some metadata:
+        #
+        # data["collection"] = {
+        #   "totalItems" => tracks.count,
+        #   "items" => tracks.collect do |track|
+        #     decorate_track(track)
+        #   end
+        # },
+
+        # for a single track, the Object can be simply added in:
+        track = decorate_track(tracks)
+        data["object"]    = track["object"]
+        data["published"] = track["published"] unless track["published"].nil?
 
         # TODO: how to handle a message for multiple tracks?
         data["content"] = tracks[:message] if tracks.is_a?(Hash)
@@ -153,7 +155,7 @@ module Pump
           }
         }
 
-        data["published"] = track[:datetime].strftime("%Y-%m-%dT%H:%M:%S.%LZ") unless track[:datetime].nil?
+        data["published"] = Pump::Util::DateTime.json_datetime(track[:datetime]) unless track[:datetime].nil?
 
         return data
       end
