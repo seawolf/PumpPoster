@@ -5,6 +5,10 @@ module Pump
     class DateTime
       STRFTIME_UTC_JS = "%Y-%m-%dT%H:%M:%SZ"
 
+      def self.utc_tzinfo
+        return TZInfo::Timezone.get('UTC')
+      end
+
       def self.local_tzinfo
         return TZInfo::Timezone.get('Europe/London')
       end
@@ -12,6 +16,11 @@ module Pump
       def self.to_utc(obj)
         obj = ::DateTime.parse(obj) if obj.is_a?(String)
         return self.local_tzinfo.local_to_utc(obj)
+      end
+
+      def self.from_utc(obj)
+        obj = ::DateTime.parse(obj) if obj.is_a?(String)
+        return self.utc_tzinfo.local_to_utc(obj)
       end
 
       def self.json_datetime(datetime)
