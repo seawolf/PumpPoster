@@ -79,7 +79,7 @@ module Scraper
       # <a href="/brewery/8395">Tatton Brewery</a>
       # at
       # <a href="/venue/134294">The Lion Tavern</a>
-      return (element/"p.text a").collect(&:inner_html)
+      return (element/"p.text a").collect(&:inner_html).map(&:strip)
     end
 
     def find_checkin_datetime(element)
