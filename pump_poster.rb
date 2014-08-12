@@ -1,3 +1,5 @@
+require './lib/util/datetime.rb'
+
 require './lib/pump/client.rb'
 require './lib/pump/login.rb'
 require './lib/pump/menu.rb'
