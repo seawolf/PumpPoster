@@ -84,12 +84,7 @@ module Scraper
 
     def find_checkin_datetime(element)
       str = (element/"div.feedback a.time").collect(&:inner_html).first
-      unless str.nil?
-        begin
-          return DateTime.parse(str)
-        rescue ArgumentError
-        end
-      end
+      return Pump::Util::DateTime.from_utc(str)
     end
 
     def generate_content(checkin_url, beer_name, brewery_name)
