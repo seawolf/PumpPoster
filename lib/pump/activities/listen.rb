@@ -16,9 +16,10 @@ module Pump
       def submit!
         puts "  · Submitting #{@count} tracks..."
         return nil if @count == 0
-        pp decorate_tracks(@tracks.first) if @count > 0
-        #posted = post!( decorate_tracks(@tracks.first) )
-        #check(posted)
+        activity = Pump::Activity.new(@login, "listen", decorate_track(@tracks.first), false).json
+        puts activity
+        # posted = post!(activity)
+        # check(posted)
         # delete!(posted)
       end
 
@@ -87,52 +88,6 @@ module Pump
         return response
       end
 
-      def decorate_tracks(tracks)
-        data = {
-          "actor" => {
-            "objectType" => "person",
-            "displayName" => @login.nickname,
-            "url" => "#{@login.username}@#{@login.host}",
-            "id" => "acct:#{@login.username}@#{@login.host}"
-          },
-          "verb" => "listen",
-
-          "to" => [
-            {
-              "objectType" => "collection",
-              "id" => "http://activityschema.org/collection/public"
-            }
-          ],
-          "cc" => [
-            {
-              "objectType" => "collection",
-              "id" => @login.followers_url
-            }
-          ]
-        }
-
-        # for multiple tracks, their objects should be wrapped in a
-        # collection, with some metadata:
-        #
-        # data["collection"] = {
-        #   "totalItems" => tracks.count,
-        #   "items" => tracks.collect do |track|
-        #     decorate_track(track)
-        #   end
-        # },
-
-        # for a single track, the Object can be simply added in:
-        track = decorate_track(tracks)
-        data["object"]    = track["object"]
-        data["published"] = track["published"] unless track["published"].nil?
-
-        # TODO: how to handle a message for multiple tracks?
-        data["content"] = tracks[:message] if tracks.is_a?(Hash)
-
-        json = JSON.generate(data)
-        return json
-      end
-
       def decorate_track(track)
         data = {
           "object" => {
@@ -155,6 +110,7 @@ module Pump
           }
         }
 
+        data["content"] = track[:message] if track.is_a?(Hash)
         data["published"] = Pump::Util::DateTime.json_datetime(track[:datetime]) unless track[:datetime].nil?
 
         return data

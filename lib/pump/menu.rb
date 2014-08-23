@@ -1,5 +1,6 @@
 require './lib/net/rss/lastfm.rb'
 require './lib/net/scraper/untappd.rb'
+require './lib/pump/activity.rb'
 require './lib/pump/activities/drink.rb'
 require './lib/pump/activities/listen.rb'
 require './lib/pump/activities/train_journey.rb'

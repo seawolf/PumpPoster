@@ -16,8 +16,9 @@ module Pump
       def submit!
         puts "  · Submitting #{@count} drinks..."
         return nil if @count == 0
-        pp decorate_drinks(@drinks.first) if @count > 0
-        # posted = post!( decorate_drinks(@drinks.first) )
+        activity = Pump::Activity.new(@login, "consume", decorate_drink(@drinks.first), false).json
+        puts activity
+        # posted = post!(activity)
         # check(posted)
         # delete!(posted)
       end
@@ -87,51 +88,6 @@ module Pump
         return response
       end
 
-      def decorate_drinks(drinks)
-        data = {
-          "actor" => {
-            "objectType" => "person",
-            "displayName" => @login.nickname,
-            "url" => "#{@login.username}@#{@login.host}",
-            "id" => "acct:#{@login.username}@#{@login.host}"
-          },
-          "verb" => "consume",
-          "to" => [
-            {
-              "objectType" => "collection",
-              "id" => "http://activityschema.org/collection/public"
-            }
-          ],
-          "cc" => [
-            {
-              "objectType" => "collection",
-              "id" => @login.followers_url
-            }
-          ]
-        }
-
-        # for multiple drinks, their objects should be wrapped in a
-        # collection, with some metadata:
-        #
-        # data["collection"] = {
-        #   "totalItems" => drinks.count,
-        #   "items" => drinks.collect do |drink|
-        #     decorate_drink(drink)
-        #   end
-        # },
-
-        # for a single drink, the Object can be simply added in:
-        drink = decorate_drink(drinks)
-        data["object"]    = drink["object"]
-        data["published"] = drink["published"] unless drink["published"].nil?
-
-        # TODO: how to handle a message for multiple drinks?
-        data["content"] = drinks[:message] if drinks.is_a?(Hash)
-
-        json = JSON.generate(data)
-        return json
-      end
-
       def decorate_drink(drink)
         data = {
           "object" => {
@@ -144,6 +100,7 @@ module Pump
           }
         }
 
+        data["content"] = drink[:message] if drink.is_a?(Hash)
         data["published"] = Pump::Util::DateTime.json_datetime(drink[:datetime]) unless drink[:datetime].nil?
 
         return data

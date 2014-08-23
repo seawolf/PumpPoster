@@ -19,7 +19,9 @@ module Pump
         return nil if @journey.nil?
         puts "Press Enter to post." ; gets
         puts "  · Posting journey..."
-        posted = post!( decorate )
+        activity = Pump::Activity.new(@login, "travel", decorate, false).json
+        puts activity
+        # posted = post!(activity)
         # check(posted)
         # delete!(posted)
       end
@@ -168,14 +170,7 @@ module Pump
       end
 
       def decorate
-        data = {
-          "actor" => {
-            "objectType" => "person",
-            "displayName" => @login.nickname,
-            "url" => "#{@login.username}@#{@login.host}",
-            "id" => "acct:#{@login.username}@#{@login.host}"
-          },
-          "verb" => "travel",  # TODO: registered verb?
+        return {
           "object" => {
             "objectType" => "train journey",  # TODO: registered object type?
             "displayName" => @journey.schedule.title,
@@ -186,25 +181,9 @@ module Pump
             },
           },
           "content" => @journey.message,
-          "to" => [
-            {
-              "objectType" => "collection",
-              "id" => "http://activityschema.org/collection/public"
-            }
-          ],
-          "cc" => [
-            {
-              "objectType" => "collection",
-              "id" => @login.followers_url
-            }
-          ]
+          # "published" => @journey.terminus.datetime.strftime("%Y-%m-%dT%H:%M:%SZ")
+          "published" => Pump::Util::DateTime.json_datetime(@journey.terminus.datetime)
         }
-
-        # data["published"] = @journey.terminus.datetime.strftime("%Y-%m-%dT%H:%M:%SZ")
-        data["published"] = Pump::Util::DateTime.json_datetime(@journey.terminus.datetime)
-
-        json = JSON.generate(data)
-        return json
       end
 
       class Journey
