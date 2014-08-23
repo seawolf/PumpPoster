@@ -31,7 +31,8 @@ module Pump
         end
 
         begin
-          print "  > Date (YYYY-MM-DD): "; date = Date.parse(gets.chomp)
+          print "  > Date (YYYY-MM-DD; blank for today): " ; raw_date = gets.chomp
+          date = raw_date.empty? ? Date.today : Date.parse(raw_date)
         rescue ArgumentError
           retry
         end
