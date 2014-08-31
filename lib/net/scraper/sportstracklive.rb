@@ -49,8 +49,7 @@ module Scraper
     def parse_page(page_string)
       tracks = []
       (page_string/"table.searchresult tr")[1..-1].each_with_index do |e, i|
-        next unless (i % 3 == 0)
-        puts
+        next unless (i % 3 == 0)  # excess DIVs in page
 
         link      = find_track_link(e)
         distance  = find_track_text(e)
