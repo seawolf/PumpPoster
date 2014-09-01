@@ -11,7 +11,19 @@ module Pump
 
       def initialize(login, data=nil)
         @login = login
-        data = ask_for_data unless data.is_a?(Hash)
+
+        unless data.is_a?(Hash)
+          data = ask_for_data
+          while data.nil? do
+            print "  ! There was a problem fetching journey data. Try again? "; answer = gets.chomp.upcase
+            if answer == "Y"
+              data = ask_for_data
+            else
+              return nil
+            end
+          end
+        end
+
         @journey = Journey.new(data, @login) unless data.nil? || data.keys.empty?
       end
 
