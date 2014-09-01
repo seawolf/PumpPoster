@@ -114,7 +114,7 @@ module Pump
       puts "  · Application authorised for #{@username} at #{@site}, fetching keys..."
       doc = Hpricot(response.body)
       verifier = (doc/"td#verifier").inner_html
-      raise ArgumentError.new("Unable to obtain verifier token") unless verifier.length > 0
+      raise ArgumentError.new("Unable to obtain verifier token; check the site, username and password") unless verifier.length > 0
       puts "    · Request (authoriser) token found"
 
       access_token = request_token.get_access_token(oauth_verifier: verifier)
