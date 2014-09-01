@@ -64,17 +64,17 @@ EOM
         when "cycle"
           puts "  · SportsTrackLive selected.\n"
           Pump::Activities::Cycle.new(@app.login,
-            Scraper::Sportstracklive.new("seawolf", @app.login)
+            Scraper::Sportstracklive.new("YOUR_USERNAME_HERE", @app.login)
           ).submit!
         when "drink"
           puts "  · Untappd selected.\n"
           Pump::Activities::Drink.new(@app.login,
-            Scraper::Untappd.new("seawolf", @app.login)
+            Scraper::Untappd.new("YOUR_USERNAME_HERE", @app.login)
           ).submit!
         when "listen"
           puts "  · LastFM selected.\n"
           Pump::Activities::Listen.new(@app.login,
-            RSS::LastFm.new("iamseawolf", @app.login)
+            RSS::LastFm.new("YOUR_USERNAME_HERE", @app.login)
           ).submit!
         when "train"
           puts "  · RealTimeTrains selected.\n"
