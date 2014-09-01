@@ -36,10 +36,7 @@ module Pump
         user = options_hash[:user]
         pass = options_hash[:pass]
 
-        unless (site && user && pass)
-          puts "  * You must supply a site, username and password. Try: #{__FILE__} --help"
-          exit 65
-        end
+        site, user, pass = ensure_credentials(site, user, pass)
       end
 
       client = Pump::Client.new(site, client_tokens)
@@ -52,6 +49,30 @@ module Pump
 
     def secrets_exist?
       return File.exist?(CLIENT_SECRETS) && File.exist?(LOGIN_SECRETS)
+    end
+
+    def ensure_credentials(site, user, pass)
+      while site.to_s.strip.length == 0
+        print "    > Enter your Pump.io server URL (e.g. https://mysite.com): "
+        site = gets.strip
+      end
+
+      while user.to_s.strip.length == 0
+        print "    > Enter your username on #{site}: "
+        user = gets.strip
+      end
+
+      while pass.to_s.strip.length == 0
+        print "    > Enter the password for #{user} on #{site}: "
+        pass = gets.strip
+      end
+
+      unless (site.to_s.length && user.to_s.length && pass.to_s.length)
+        puts "  * You must supply a site, username and password. Try: #{__FILE__} --help"
+        exit 65
+      end
+
+      return [site, user, pass]
     end
   end
 end
