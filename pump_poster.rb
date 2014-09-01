@@ -1,3 +1,20 @@
+#  PumpPoster  ·  http://code.seawolfsanctuary.com/pumpposter
+#
+#  Copyright (C) 2014 the seawolfsanctuary
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 require './lib/util/datetime.rb'
 
 require './lib/pump/client.rb'
@@ -12,9 +29,11 @@ module Pump
     attr_reader :login, :activity
 
     NAME        = "PumpPoster"
-    VERSION     = "0.1"
+    VERSION     = "1.0.0"
+    YEAR        = Time.now.year
     MAINTAINER  = "webmaster@seawolfsanctuary.com"
-    WEBSITE     = "https://seawolfsanctuary.com/"
+    COMPANY     = "the seawolfsanctuary"
+    WEBSITE     = "http://code.seawolfsanctuary.com/pumpposter"
 
     CLIENT_SECRETS  = "CLIENT_SECRETS.TXT"
     LOGIN_SECRETS   = "LOGIN_SECRETS.TXT"
@@ -109,4 +128,12 @@ def parse_opts
 end
 
 puts "  · Loaded PumpPoster v#{Pump::Poster::VERSION}"
+puts <<LICENSE_NOTICE
+    #{Pump::Poster::NAME}  ·  Copyright (C) #{Pump::Poster::YEAR}  ·  #{Pump::Poster::COMPANY}
+    This is free software, and you are welcome to redistribute it
+    under certain conditions. This software comes with ABSOLUTELY
+    NO WARRANTY. See the LICENSE file for details.
+
+LICENSE_NOTICE
+
 app = Pump::Poster.new(parse_opts)
