@@ -4,7 +4,8 @@ require './lib/net/communicator.rb'
 
 module Api
   module TrainTimes
-    HOST = "http://api.traintimes.im"
+    HOST = "https://api.rtt.io/api/v1"
+    TYPE = :json
 
     class Schedule
       attr_reader :results
