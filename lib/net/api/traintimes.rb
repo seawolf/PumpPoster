@@ -1,4 +1,5 @@
 require 'date'
+require 'yaml'
 
 require './lib/net/communicator.rb'
 
@@ -37,6 +38,16 @@ module Api
 
       def clean_time(str)
         str.insert(2, ":") if str.is_a?(String) && str.length >= 4
+      end
+
+      def fetch_creds
+        begin
+          content = YAML.load( File.read('RTT_CREDS.YML') )
+          puts "  · RTT Credentials fetched: #{content}"
+          return content
+        rescue Errno::ENOENT
+          return {}
+        end
       end
     end
   end
