@@ -51,39 +51,39 @@ module Pump
           retry
         end
 
-        others = ::Api::TrainTimes::Schedule.new(uid, date).results
-        return nil if others.empty?
+        schedule = ::Api::TrainTimes::Schedule.new(uid, date).results
+        return nil if schedule.empty?
 
-        headcode = others["trainIdentity"]
+        headcode = schedule['trainIdentity']
 
-        calling_points = others["locations"]
+        calling_points = schedule['locations']
 
-        schedule_origin_cors = calling_points.first["crs"]
-        schedule_origin_name = calling_points.first["description"]
-        schedule_origin_date = calling_points.first["calldate"]
-        schedule_origin_time = calling_points.first["departure_time"]
+        schedule_origin_cors = calling_points.first['crs']
+        schedule_origin_name = calling_points.first['description']
+        schedule_origin_date = date_for_calling_point(date, calling_points.first['gbttBookedDepartureNextDay'])
+        schedule_origin_time = calling_points.first['gbttBookedDeparture']
 
-        schedule_terminus_cors = calling_points.last["crs"]
-        schedule_terminus_name = calling_points.last["description"]
-        schedule_terminus_date = calling_points.last["calldate"]
-        schedule_terminus_time = calling_points.last["arrival_time"]
+        schedule_terminus_cors = calling_points.last['crs']
+        schedule_terminus_name = calling_points.last['description']
+        schedule_terminus_date = date_for_calling_point(date, calling_points.last['gbttBookedArrivalNextDay'])
+        schedule_terminus_time = calling_points.last['gbttBookedArrival']
 
         puts "    · Found schedule for #{headcode} #{schedule_origin_name} (#{schedule_origin_cors}) to #{schedule_terminus_name} (#{schedule_terminus_cors})"
 
-        print "  > Origin code: "
+        print '  > Origin code: '
         origin_cors = gets.chomp.upcase
-        origin = calling_points.select { |c| c["crs"] == origin_cors }.first
-        origin_name = origin["description"]
-        origin_date = origin["calldate"]
-        origin_time = origin["departure_time"]
+        origin = calling_points.select { |c| c['crs'] == origin_cors }.first
+        origin_name = origin['description']
+        origin_date = date_for_calling_point(date, origin['gbttBookedDepartureNextDay'])
+        origin_time = origin['gbttBookedDeparture']
         puts "    · Calling at #{origin_name} on #{origin_date} at #{origin_time}"
 
-        print "  > Terminus code: "
+        print '  > Terminus code: '
         terminus_cors = gets.chomp.upcase
-        terminus = calling_points.select { |c| c["crs"] == terminus_cors }.last
-        terminus_name = terminus["description"]
-        terminus_date = terminus["calldate"]
-        terminus_time = terminus["arrival_time"]
+        terminus = calling_points.select { |c| c['crs'] == terminus_cors }.last
+        terminus_name = terminus['description']
+        terminus_date = date_for_calling_point(date, terminus['gbttBookedArrivalNextDay'])
+        terminus_time = terminus['gbttBookedArrival']
         puts "    · Calling at #{terminus_name} on #{terminus_date} at #{terminus_time}"
 
         r = {
@@ -114,9 +114,17 @@ module Pump
             }
           }
         }
+
+        return r
       end
 
       private
+
+      def date_for_calling_point(date, bool=false)
+        date = Date.parse(date) if date.is_a?(String)
+        date = date.next_day if bool == true
+        return date.strftime("%Y-%m-%d")
+      end
 
       def post!(decorated_data)
         uri = URI.parse("#{@login.site}/api/user/#{@login.username}/feed")
