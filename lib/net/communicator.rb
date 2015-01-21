@@ -45,11 +45,12 @@ class Communicator
     return http.request(request)
   end
 
-  def self.get (raw_uri, port, cookie=nil, auth_hash=nil)
+  def self.get (raw_uri, port, cookie=nil, auth_hash=nil, basic_auth=nil)
     uri = URI.parse(raw_uri)
     http = Net::HTTP.new(uri.host, uri.port)
     http.read_timeout = http.open_timeout = 10
     http.use_ssl = (port == 443)
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl? # TODO: temp while cert is fixed
 
     request = Net::HTTP::Get.new(uri.request_uri)
     request['Accept-Language'] = "en-gb,en;q=0.5"
@@ -59,7 +60,9 @@ class Communicator
       request["Authorization"] = OAuth::Client::Helper.new(request, auth_hash).header
     end
 
-    puts "    > GET to #{uri.request_uri}#{" with auth hash" unless request['Authorization'].nil?}"
+    request.basic_auth basic_auth[:username], basic_auth[:password] if basic_auth
+
+    puts "    > GET to #{uri.request_uri}#{" with auth hash" unless request['Authorization'].nil?}#{" with basic auth" if basic_auth}"
     return http.request(request)
   end
 end
