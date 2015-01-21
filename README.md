@@ -26,6 +26,10 @@ NOTE: to use external services, you may be required to supply your
 existing username for those sites. Replace `YOUR_USERNAME_HERE` in the
 `lib/pump/menu.rb` file accordingly.
 
+NOTE: the RealTimeTrains API currently requires authentication. Register
+at https://api.rtt.io and supply your credentials in the RTT_CREDS.YML
+file (an example file can be found as RTT_CREDS_EXAMPLE.YML).
+
 As the software is currently in an early version, it may break. There
 is not much/any/enough handling of, for example, network errors or
 invalid data received from external feeds. If you encounter any errors
